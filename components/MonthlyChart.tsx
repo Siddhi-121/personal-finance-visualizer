@@ -4,44 +4,49 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import { Transaction } from "./TransactionList"
 
 type MonthlyData = {
-  name: string
-  amount: number
+  month: string
+  total: number
 }
 
 export default function MonthlyChart() {
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [data, setData] = useState<MonthlyData[]>([])
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/transactions")
-        const transactions: Transaction[] = await res.json()
-
-        const grouped: Record<string, number> = {}
-
-        transactions.forEach((t) => {
-          const month = new Date(t.date).toLocaleString("default", { month: "short", year: "numeric" })
-          grouped[month] = (grouped[month] || 0) + t.amount
-        })
-
-        const chartData: MonthlyData[] = Object.entries(grouped).map(([name, amount]) => ({ name, amount }))
-        setData(chartData)
-      } catch (error) {
-        console.error("Failed to fetch monthly transaction data", error)
-      }
+    const fetchTransactions = async () => {
+      const res = await fetch("/api/transactions")
+      const txns: Transaction[] = await res.json()
+      setTransactions(txns)
     }
-
-    fetchData()
+    fetchTransactions()
   }, [])
+
+  useEffect(() => {
+    const grouped: Record<string, number> = {}
+
+    transactions.forEach((txn: Transaction) => {
+      const date = new Date(txn.date)
+      const month = date.toLocaleString("default", { month: "short", year: "numeric" })
+      grouped[month] = (grouped[month] || 0) + txn.amount
+    })
+
+    const chartData: MonthlyData[] = Object.entries(grouped).map(([month, total]) => ({
+      month,
+      total,
+    }))
+
+    setData(chartData)
+  }, [transactions])
 
   return (
     <div className="h-64 bg-white p-4 rounded shadow">
+      <h2 className="text-lg font-semibold mb-2">📅 Monthly Spending</h2>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
-          <XAxis dataKey="name" />
+          <XAxis dataKey="month" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="amount" fill="#4f46e5" />
+          <Bar dataKey="total" fill="#4f46e5" />
         </BarChart>
       </ResponsiveContainer>
     </div>

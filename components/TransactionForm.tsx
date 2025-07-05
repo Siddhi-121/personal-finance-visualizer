@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 
 const CATEGORIES = ["Food", "Transport", "Rent", "Utilities", "Shopping", "Other"]
 
-type FormState = {
+type TransactionFormData = {
   description: string
   amount: string
   date: string
@@ -15,7 +15,7 @@ type FormState = {
 }
 
 export default function TransactionForm() {
-  const [form, setForm] = useState<FormState>({
+  const [form, setForm] = useState<TransactionFormData>({
     description: "",
     amount: "",
     date: "",
@@ -26,7 +26,7 @@ export default function TransactionForm() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!form.description || !form.amount || !form.date) return
 
