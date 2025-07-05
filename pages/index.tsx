@@ -1,4 +1,5 @@
 "use client"
+
 import TransactionForm from "@/components/TransactionForm"
 import DashboardCards from "@/components/DashboardCards"
 import CategoryChart from "@/components/CategoryChart"
@@ -7,7 +8,7 @@ import BudgetForm from "@/components/BudgetForm"
 import BudgetComparisonChart from "@/components/BudgetComparisonChart"
 import SpendingInsights from "@/components/SpendingInsights"
 
-export default function Home() {
+export default function Home(): JSX.Element {
   return (
     <main className="min-h-screen bg-gray-100 p-6 space-y-8">
       <h1 className="text-3xl font-bold text-center">💸 Personal Finance Visualizer – Stage 3</h1>

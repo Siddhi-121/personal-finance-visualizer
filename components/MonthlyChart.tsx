@@ -1,37 +1,47 @@
 "use client"
-
-import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { useEffect, useState } from "react"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import { Transaction } from "./TransactionList"
+
+type MonthlyData = {
+  name: string
+  amount: number
+}
 
 export default function MonthlyChart() {
-  const [data, setData] = useState([])
+  const [data, setData] = useState<MonthlyData[]>([])
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch("/api/transactions")
-      const txns = await res.json()
+      try {
+        const res = await fetch("/api/transactions")
+        const transactions: Transaction[] = await res.json()
 
-      const monthly = txns.reduce((acc: any, txn: any) => {
-        const month = new Date(txn.date).toLocaleString("default", { month: "short", year: "numeric" })
-        acc[month] = (acc[month] || 0) + txn.amount
-        return acc
-      }, {})
+        const grouped: Record<string, number> = {}
 
-      const chartData = Object.entries(monthly).map(([month, total]) => ({ month, total }))
-      setData(chartData)
+        transactions.forEach((t) => {
+          const month = new Date(t.date).toLocaleString("default", { month: "short", year: "numeric" })
+          grouped[month] = (grouped[month] || 0) + t.amount
+        })
+
+        const chartData: MonthlyData[] = Object.entries(grouped).map(([name, amount]) => ({ name, amount }))
+        setData(chartData)
+      } catch (error) {
+        console.error("Failed to fetch monthly transaction data", error)
+      }
     }
 
     fetchData()
   }, [])
 
   return (
-    <div className="bg-white p-6 shadow rounded">
-      <ResponsiveContainer width="100%" height={300}>
+    <div className="h-64 bg-white p-4 rounded shadow">
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
-          <XAxis dataKey="month" />
+          <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="total" fill="#4f46e5" />
+          <Bar dataKey="amount" fill="#4f46e5" />
         </BarChart>
       </ResponsiveContainer>
     </div>
